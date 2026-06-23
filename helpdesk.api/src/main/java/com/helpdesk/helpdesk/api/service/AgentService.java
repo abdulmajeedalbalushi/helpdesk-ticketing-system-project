@@ -3,6 +3,7 @@ package com.helpdesk.helpdesk.api.service;
 import com.helpdesk.helpdesk.api.dto.request.AgentCreateRequest;
 import com.helpdesk.helpdesk.api.dto.response.AgentResponse;
 import com.helpdesk.helpdesk.api.entity.Agent;
+import com.helpdesk.helpdesk.api.exception.DuplicateEmailException;
 import com.helpdesk.helpdesk.api.exception.NotFoundException;
 import com.helpdesk.helpdesk.api.repository.AgentRepository;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ public class AgentService {
     }
 
     public AgentResponse createAgent(AgentCreateRequest request) {
+        if (agentRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new DuplicateEmailException("An agent with email " + request.getEmail() + " already exists");
+        }
         Agent agent = new Agent();
         agent.setName(request.getName());
         agent.setEmail(request.getEmail());

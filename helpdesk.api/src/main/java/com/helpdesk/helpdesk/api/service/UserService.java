@@ -3,6 +3,7 @@ package com.helpdesk.helpdesk.api.service;
 import com.helpdesk.helpdesk.api.dto.request.UserCreateRequest;
 import com.helpdesk.helpdesk.api.dto.response.UserResponse;
 import com.helpdesk.helpdesk.api.entity.User;
+import com.helpdesk.helpdesk.api.exception.DuplicateEmailException;
 import com.helpdesk.helpdesk.api.exception.NotFoundException;
 import com.helpdesk.helpdesk.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ public class UserService {
     }
 
     public UserResponse createUser(UserCreateRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new DuplicateEmailException("A user with email " + request.getEmail() + " already exists");
+        }
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());

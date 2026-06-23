@@ -87,9 +87,13 @@ public class TicketService {
                 .toList();
     }
 
-    @Transactional
     public TicketDetailResponse assignAgent(Long ticketId, TicketAssignRequest request) {
         Ticket ticket = findTicketOrThrow(ticketId);
+
+        if (ticket.getStatus() == TicketStatus.RESOLVED) {
+            throw new InvalidStatusTransitionException("Cannot assign an agent to a RESOLVED ticket");
+        }
+
         Agent agent = agentService.findAgentOrThrow(request.getAgentId());
 
         ticket.setAssignedAgent(agent);

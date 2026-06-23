@@ -6,7 +6,7 @@ A Spring Boot REST API for an IT helpdesk: employees raise tickets, tickets get 
 
 - Java 17, Spring Boot 3.5.15
 - Spring Data JPA / Hibernate
-- Oracle Database (primary) 
+- Oracle Database 
 - Maven (wrapper included, no local Maven install needed)
 
 ## Running the project locally
@@ -122,3 +122,50 @@ The spec gives SLA durations per priority (CRITICAL 4h, HIGH 1d, MEDIUM 3d, LOW 
 - **Full CRUD on users/agents beyond create+list+get** (update, delete) was not required by the spec and isn't implemented — only what the ticket workflow actually needs.
 - **`ddl-auto=update`** is used so the schema evolves automatically from the entity classes during development. This is explicitly not a production-safe setting (it can't handle destructive changes like column renames) — a real deployment should switch to a migration tool (Flyway/Liquibase) once the schema stabilizes.
 - **IDENTITY-based primary keys** (`GenerationType.IDENTITY`) were chosen over Oracle's traditional `SEQUENCE` + trigger pattern, since Oracle 12c+ supports native identity columns and Hibernate handles them transparently — simpler for this scale, at the minor cost of disabling JDBC batch inserts (not a concern here).
+
+
+## Commands that demonstrates endpoint:
+1. Open to resolved
+  
+http://localhost:8080/api/tickets/7/status
+   
+{"status":"RESOLVED"
+   }
+
+{
+   "timestamp": "2026-06-23T16:00:15.0992154",
+   "status": 409,
+   "error": "Conflict",
+   "message": "Cannot transition from OPEN to RESOLVED",
+   "fieldErrors": null
+   }
+
+2. Assigning to an agent to a resolved ticket
+   
+http://localhost:8080/api/tickets/10/assign
+
+{"agentId":2
+   }
+   
+{
+   "timestamp": "2026-06-23T16:32:01.7179733",
+   "status": 409,
+   "error": "Conflict",
+   "message": "Cannot assign an agent to a RESOLVED ticket",
+   "fieldErrors": null
+   }
+
+3. Reopening a ticket via wrong transition
+
+http://localhost:8080/api/tickets/10/status
+
+{"status":"IN_PROGRESS"
+} 
+
+{
+"timestamp": "2026-06-23T16:35:12.7468654",
+"status": 409,
+"error": "Conflict",
+"message": "Cannot transition from RESOLVED to IN_PROGRESS",
+"fieldErrors": null
+}

@@ -1,1 +1,0 @@
-- [Helpdesk audit findings](project_helpdesk_audit_findings.md) — 2026-06-22 audit gaps: no 409 for dup-email conflicts; assign-agent has no status guard (intentional); SLA/avg-resolution keys off createdAt not reopen events.
